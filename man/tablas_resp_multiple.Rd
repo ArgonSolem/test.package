@@ -2,14 +2,14 @@
 % Please edit documentation in R/tablas_resp_multiple.R
 \name{tablas_resp_multiple}
 \alias{tablas_resp_multiple}
-\title{Generación de frecuencias univariadas}
+\title{Generate Frequency Tables from Multiple Response variables}
 \usage{
 tablas_resp_multiple(.base, .vars, .wt = NULL, na.rm = TRUE)
 }
 \arguments{
 \item{.base}{A dataframe.}
 
-\item{.vars}{Set of columns.}
+\item{.vars}{A set of columns.}
 
 \item{.wt}{Optional weights.}
 
@@ -19,5 +19,7 @@ tablas_resp_multiple(.base, .vars, .wt = NULL, na.rm = TRUE)
 A tibble with counts and percentages.
 }
 \description{
-Description of what it does
+This function generates a univariate frequency table for a set of variables,
+displaying the count and percentage of each category within the dataframe.
+It supports optional weighting and can remove missing values if specified.
 }

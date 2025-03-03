@@ -17,9 +17,6 @@
 #' @importFrom assertthat assert_that
 #' @importFrom glue glue
 #' @importFrom tibble tibble
-#' @license MIT
-
-utils::globalVariables(c(".", "n", "total_n", "response"))  # Prevents R CMD check warnings
 
 tablas_univariadas <- function(.base, .var, .wt = NULL, na.rm = TRUE) {
 
@@ -61,3 +58,6 @@ tablas_univariadas <- function(.base, .var, .wt = NULL, na.rm = TRUE) {
 
   return(data_var)
 }
+
+utils::globalVariables(c(".", "n", "total_n", "response"))  # Prevents R CMD check warnings
+
