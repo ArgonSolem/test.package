@@ -1,6 +1,6 @@
 #' Generate Frequency Tables from Multiple Response variables
 #'
-#' This function generates a univariate frequency table for a set of variables,
+#' This function generates a multiple response frequency table for a set of variables,
 #' displaying the count and percentage of each category within the dataframe.
 #' It supports optional weighting and can remove missing values if specified.
 #'
