@@ -63,7 +63,9 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
 
   # Determine variable to use
   if (!("pct" %in% colnames(.base))) {
-    if (is.null(.var)) stop("If providing raw data, you must specify `.var`.")
+    if (rlang::quo_is_missing(rlang::enquo(.var))) {
+      stop("If providing raw data, you must specify `.var`.")
+    }
     .base <- .base %>% tablas_univariadas(., {{ .var }})
     var_label <- rlang::as_name(rlang::enquo(.var))
   } else {
