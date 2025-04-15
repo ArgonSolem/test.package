@@ -39,7 +39,7 @@ tabulados_banner <- function(.base, .var, .banner = NULL, .wt = NULL, .cases = F
   # Prepare tab_cols inputs safely
   cols_to_use <- list(total())
   if (!is.null(banner_name)) {
-    !!!cols_to_use <- append(cols_to_use, list(.base[[banner_name]]))
+    cols_to_use <- append(cols_to_use, list(.base[[banner_name]]))
   }
 
   # Main loop for tabulations

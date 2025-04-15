@@ -29,7 +29,8 @@
 #' @importFrom magrittr %>%
 
 plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
-                                         .hsize = 1.3, .plot_text_size = 6,
+                                         .hsize = 1.3, .digits = 2,
+                                         .plot_text_size = 6,
                                          .plot_text_color = "#252525",
                                          .legend_text_size = 16,
                                          .gray_category = NULL,
@@ -40,6 +41,8 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
   # Type Checks
   assert_that(is.data.frame(.base), msg = "Input .base must be a data frame.")
   assert_that(is.numeric(.hsize) && .hsize > 0, msg = "Parameter .hsize must be a positive number.")
+  assert_that(is.numeric(.digits) && .digits >= 0 && .digits %% 1 == 0,
+              msg = "Parameter .digits must be a non-negative integer.")
   assert_that(is.numeric(.plot_text_size) && .plot_text_size > 0,
               msg = "Parameter .plot_text_size must be a positive number.")
   assert_that(is.numeric(.legend_text_size) && .legend_text_size > 0,
@@ -152,11 +155,11 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
       legend.background = element_rect(fill = "transparent"),
       legend.box.background = element_rect(fill = "transparent"),
       panel.background = element_rect(fill = "transparent"),
-      plot.background = element_rect(fill = "transparent",color = NA),
+      plot.background = element_rect(fill = "transparent", color = NA),
     ) +
     geom_text(
       data = filtered_data,
-      aes(label = scales::percent(pct, accuracy = 0.01)),
+      aes(label = scales::percent(pct, accuracy = 1 / (10 ^ .digits))),
       position = position_stack(vjust = 0.5),
       size = .plot_text_size,
       color = rep_len(.plot_text_color, nrow(filtered_data))
