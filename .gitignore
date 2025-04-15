@@ -1,4 +1,16 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
+# RStudio project files  
+.Rproj.user  
+.Rhistory  
+.RData  
+.Ruserdata  
+
+# R package build files  
+.Rbuildignore  
+*.tar.gz  
+*.Rcheck/  
+
+# Temporary files and logs  
+*.log  
+*.out  
+*.tmp  
+*.bak  

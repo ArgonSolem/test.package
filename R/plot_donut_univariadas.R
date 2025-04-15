@@ -74,7 +74,11 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
 
   # Apply text wrapping if requested
   if (!is.null(.wrap_length)) {
-    .base[[var_label]] <- stringr::str_wrap(.base[[var_label]], width = .wrap_length)
+    original_levels <- levels(as.factor(.base[[var_label]]))
+    wrapped_levels <- stringr::str_wrap(original_levels, width = .wrap_length)
+
+    .base[[var_label]] <- factor(stringr::str_wrap(as.character(.base[[var_label]]), width = .wrap_length),
+                                 levels = wrapped_levels)
   }
 
   # Warn if percentages don't sum to ~100%
