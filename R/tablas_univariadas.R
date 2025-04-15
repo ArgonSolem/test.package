@@ -55,7 +55,12 @@ tablas_univariadas <- function(.base, .var, .wt = NULL, na.rm = TRUE) {
       pct = ifelse(total_n == 0, 0, n / total_n)
     ) %>%
     dplyr::select(-total_n)
-  data_var[1] <- to_label(data_var[1])
+
+  #Transform to labelled factor or factor in case of no labels
+  if (!is.null(attributes(data_var[1])$labels))
+    data_var[1] <- to_label(data_var[1])
+  else data_var[1] <- as_factor(data_var[1])
+
   return(data_var)
 }
 
