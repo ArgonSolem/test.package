@@ -17,6 +17,7 @@
 #' @importFrom assertthat assert_that
 #' @importFrom glue glue
 #' @importFrom tibble tibble
+#' @importFrom sjlabelled get_labels
 
 tablas_univariadas <- function(.base, .var, .wt = NULL, na.rm = TRUE) {
 
@@ -57,12 +58,13 @@ tablas_univariadas <- function(.base, .var, .wt = NULL, na.rm = TRUE) {
     dplyr::select(-total_n)
 
   #Transform to labelled factor or factor in case of no labels
-  if (!is.null(attributes(data_var[1])$labels))
+  if (!is.null(.base %>% dplyr::select({{ .var }}) %>% sjlabelled::get_labels()))
     data_var[1] <- to_label(data_var[1])
   else data_var[1] <- as_factor(data_var[1])
 
   return(data_var)
 }
+
 
 utils::globalVariables(c(".", "n", "total_n", "response"))  # Prevents R CMD check warnings
 
