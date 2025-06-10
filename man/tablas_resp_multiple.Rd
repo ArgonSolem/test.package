@@ -4,7 +4,13 @@
 \alias{tablas_resp_multiple}
 \title{Generate Frequency Tables from Multiple Response variables}
 \usage{
-tablas_resp_multiple(.base, .vars, .wt = NULL, na.rm = TRUE)
+tablas_resp_multiple(
+  .base,
+  .vars,
+  .wt = NULL,
+  na.rm = TRUE,
+  .pct_formula = c("responses", "cases")
+)
 }
 \arguments{
 \item{.base}{A dataframe.}
@@ -14,6 +20,8 @@ tablas_resp_multiple(.base, .vars, .wt = NULL, na.rm = TRUE)
 \item{.wt}{Optional weights.}
 
 \item{na.rm}{Logical, whether to remove NAs.}
+
+\item{.pct_formula}{Charater, to define the type of denominator for the percentage.}
 }
 \value{
 A tibble with counts and percentages.

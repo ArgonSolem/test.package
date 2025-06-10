@@ -9,6 +9,7 @@ plot_donut_univariadas_test2(
   .var = NULL,
   .palette = NULL,
   .hsize = 1.3,
+  .digits = 2,
   .plot_text_size = 6,
   .plot_text_color = "#252525",
   .legend_text_size = 16,

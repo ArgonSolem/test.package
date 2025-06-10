@@ -1,9 +1,7 @@
-#' Generate (Possibly Grouped) Bar Plot
+#' Generate Grouped Bar Plot
 #'
-#' This function generates a bar plot (univariate or grouped), displaying the count
-#' and percentage of each category of a variable within a dataframe. If `.group`
-#' is supplied, bars are dodged by group; otherwise it calls
-#' `plot_bar_univariadas_test()` for a univariate plot.
+#' This function generates a grouped bar plot, displaying the count
+#' and percentage of each category of a variable within a dataframe.
 #'
 #' @param .base A raw dataframe or one processed by tablas_univariadas.
 #' @param .var Variable to plot (if .base lacks pct column).
@@ -25,12 +23,12 @@
 #' @export
 plot_bar_univariadas_grouped <- function(
     .base,
-    .var,
+    .var = NULL,
     .group = NULL,
     .wt = NULL,
     .palette = NULL,
     .category_colors = NULL,
-    .digits = 2,
+    .digits = 1,
     .plot_text_size = 6,
     .plot_text_color = "#252525",
     .legend_text_size = 16,
@@ -40,41 +38,37 @@ plot_bar_univariadas_grouped <- function(
     .omit_label = NULL,
     .horizontal = FALSE
 ) {
-  #-- Tidy evaluation
-  var_q   <- rlang::enquo(.var)
-  group_q <- rlang::enquo(.group)
-  wt_q    <- rlang::enquo(.wt)
 
-  #-- Fallback to univariate version if group missing
-  if (rlang::quo_is_missing(group_q)) {
-    return(
-      plot_bar_univariadas_test(
-        .base = .base,
-        .var = !!var_q,
-        .palette = .palette,
-        .category_colors = .category_colors,
-        .digits = .digits,
-        .plot_text_size = .plot_text_size,
-        .plot_text_color = .plot_text_color,
-        .legend_text_size = .legend_text_size,
-        .gray_category = .gray_category,
-        .wrap_length = .wrap_length,
-        .text_threshold = .text_threshold,
-        .omit_label = .omit_label,
-        .horizontal = .horizontal
-      )
-    )
+  # Determine variable to use
+  if (!("pct" %in% colnames(.base))) {
+    if (rlang::quo_is_missing(rlang::enquo(.var))) {
+      stop("If providing raw data, you must specify `.var`, `.group`.")
+    }
+    #-- Tidy evaluation
+    var_q   <- rlang::enquo(.var)
+    group_q <- rlang::enquo(.group)
+    wt_q    <- rlang::enquo(.wt)
+
+    #-- Build grouped frequency table
+    df <- .base %>%
+      dplyr::group_by(!!group_q) %>%
+      tablas_univariadas(.base = ., .var = !!var_q, .wt = !!wt_q) %>%
+      dplyr::ungroup()
+
+    #-- Extract string names
+    var_lab <- rlang::as_name(var_q)
+    grp_lab <- rlang::as_name(group_q)
+
+  } else {
+
+    df <- .base
+
+    var_lab <-names(.base)[2]
+    grp_lab <-names(.base)[1]
+
   }
 
-  #-- Extract string names
-  var_lab <- rlang::as_name(var_q)
-  grp_lab <- rlang::as_name(group_q)
 
-  #-- Build grouped frequency table
-  df <- .base %>%
-    dplyr::group_by(!!group_q) %>%
-    tablas_univariadas(.base = ., .var = !!var_q, .wt = !!wt_q) %>%
-    dplyr::ungroup()
 
   #-- Optionally wrap category labels
   if (!is.null(.wrap_length)) {
@@ -151,7 +145,8 @@ plot_bar_univariadas_grouped <- function(
                          y    = pct,
                          fill = .data[[var_lab]]
                        )) +
-    ggplot2::geom_col(position = ggplot2::position_dodge(width = 0.8)) +
+    ggplot2::geom_col(width = 0.6,
+                      position = ggplot2::position_dodge(width = 0.7)) +
     ggplot2::scale_fill_manual(
       values = category_colors,
       guide  = ggplot2::guide_legend(position = "top")
@@ -176,9 +171,9 @@ plot_bar_univariadas_grouped <- function(
         label = scales::percent(pct, accuracy = 1 / (10 ^ .digits)),
         group = .data[[var_lab]]
       ),
-      position = ggplot2::position_dodge(width = 0.8),
+      position = ggplot2::position_dodge(width = 0.7),
       vjust    = if (.horizontal) 0.5 else -0.5,
-      hjust    = if (.horizontal) -0.1 else NULL,
+      hjust    = if (.horizontal) -0.1 else 0.5,
       size     = .plot_text_size,
       color    = rep_len(.plot_text_color, nrow(filtered))
     )
