@@ -19,6 +19,7 @@
 #' @importFrom assertthat assert_that
 #' @importFrom glue glue
 #' @importFrom tibble tibble
+#' @importFrom sjmisc to_label
 
 tablas_resp_multiple <- function(.base, .vars, .wt = NULL, na.rm = TRUE,
                                  .pct_formula = c("responses", "cases")) {
@@ -80,7 +81,7 @@ tablas_resp_multiple <- function(.base, .vars, .wt = NULL, na.rm = TRUE,
       names_to = "variable",
       values_to = "response"
     ) %>%
-    dplyr::mutate(response = to_label(response)) %>%
+    dplyr::mutate(response = sjmisc::to_label(response)) %>%
     { if (na.rm) dplyr::filter(., !is.na(response)) else . }
 
   # Count responses, weighted or unweighted
