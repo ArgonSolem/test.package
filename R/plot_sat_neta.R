@@ -14,7 +14,7 @@
 #'
 #' @return A ggplot2 plot
 #' @export
-plot_satisfaction_neto <- function(
+plot_sat_neta <- function(
     .data,
     .var,
     .color_satisfaction   = "#4CAF50",
@@ -162,3 +162,4 @@ plot_satisfaction_neto <- function(
 
   return(p)
 }
+

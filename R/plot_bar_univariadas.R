@@ -68,9 +68,14 @@ plot_bar_univariadas <- function(
   # -- Determine palette fallback
   levels_vec <- unique(.base[[var_label]])
   n_lvls <- length(levels_vec)
+  # Case 1: .palette is a single color
+  if (!is.null(.palette) && length(.palette) == 1) {
+    .palette <- rep(.palette, n_lvls)
+  }
+
+  # Case 2: .palette is still NULL after checking length
   if (is.null(.palette)) {
-    .palette <- if (n_lvls == 2) c("#AC0000","#08305B")
-    else RColorBrewer::brewer.pal(min(n_lvls,11), "RdBu")
+    .palette <- if (n_lvls == 2) c("#AC0000", "#08305B") else RColorBrewer::brewer.pal(min(n_lvls, 11), "RdBu")
   }
 
   # -- Build category_colors mapping with warnings for unmapped
