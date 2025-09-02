@@ -28,41 +28,42 @@
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 
-plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
-                                         .hsize = 1.3, .digits = 2,
-                                         .plot_text_size = 6,
-                                         .plot_text_color = "#252525",
-                                         .legend_text_size = 16,
-                                         .gray_category = NULL,
-                                         .wrap_length = NULL,
-                                         .text_threshold = 0.05,
-                                         .omit_label = NULL) {
+plot_donut_univariadas <- function(.base, .var = NULL, .palette = NULL,
+                                   .hsize = 1.3, .digits = 2,
+                                   .plot_text_size = 6,
+                                   .plot_text_color = "#252525",
+                                   .legend_text_size = 16,
+                                   .category_colors = NULL,
+                                   .gray_category = NULL,
+                                   .wrap_length = NULL,
+                                   .text_threshold = 0.05,
+                                   .omit_label = NULL) {
 
   # Type Checks
-  assert_that(is.data.frame(.base), msg = "Input .base must be a data frame.")
-  assert_that(is.numeric(.hsize) && .hsize > 0, msg = "Parameter .hsize must be a positive number.")
-  assert_that(is.numeric(.digits) && .digits >= 0 && .digits %% 1 == 0,
-              msg = "Parameter .digits must be a non-negative integer.")
-  assert_that(is.numeric(.plot_text_size) && .plot_text_size > 0,
-              msg = "Parameter .plot_text_size must be a positive number.")
-  assert_that(is.numeric(.legend_text_size) && .legend_text_size > 0,
-              msg = "Parameter .legend_text_size must be a positive number.")
+  assertthat::assert_that(is.data.frame(.base), msg = "Input .base must be a data frame.")
+  assertthat::assert_that(is.numeric(.hsize) && .hsize > 0, msg = "Parameter .hsize must be a positive number.")
+  assertthat::assert_that(is.numeric(.digits) && .digits >= 0 && .digits %% 1 == 0,
+                          msg = "Parameter .digits must be a non-negative integer.")
+  assertthat::assert_that(is.numeric(.plot_text_size) && .plot_text_size > 0,
+                          msg = "Parameter .plot_text_size must be a positive number.")
+  assertthat::assert_that(is.numeric(.legend_text_size) && .legend_text_size > 0,
+                          msg = "Parameter .legend_text_size must be a positive number.")
   if (!is.null(.plot_text_color))
-    assert_that(is.character(.plot_text_color) || is.vector(.plot_text_color),
-                msg = "Parameter .plot_text_color must be a character vector.")
+    assertthat::assert_that(is.character(.plot_text_color) || is.vector(.plot_text_color),
+                            msg = "Parameter .plot_text_color must be a character vector.")
   if (!is.null(.palette))
-    assert_that(is.character(.palette) || is.vector(.palette),
-                msg = "Parameter .palette must be a character vector.")
+    assertthat::assert_that(is.character(.palette) || is.vector(.palette),
+                            msg = "Parameter .palette must be a character vector.")
   if (!is.null(.gray_category))
-    assert_that(is.character(.gray_category),
-                msg = "Parameter .gray_category must be a character vector.")
+    assertthat::assert_that(is.character(.gray_category),
+                            msg = "Parameter .gray_category must be a character vector.")
   if (!is.null(.wrap_length))
-    assert_that(is.numeric(.wrap_length) && .wrap_length > 0,
-                msg = "Parameter .wrap_length must be a positive number.")
-  assert_that(is.numeric(.text_threshold) && .text_threshold > 0 && .text_threshold <= 1,
-              msg = "Parameter .text_threshold must be a positive number between 0 and 1.")
+    assertthat::assert_that(is.numeric(.wrap_length) && .wrap_length > 0,
+                            msg = "Parameter .wrap_length must be a positive number.")
+  assertthat::assert_that(is.numeric(.text_threshold) && .text_threshold >= 0 && .text_threshold <= 1,
+                          msg = "Parameter .text_threshold must be a positive number between 0 and 1.")
   if (!is.null(.omit_label))
-    assert_that(is.character(.omit_label), msg = "Parameter .omit_label must be a character vector.")
+    assertthat::assert_that(is.character(.omit_label), msg = "Parameter .omit_label must be a character vector.")
 
   # Determine variable to use
   if (!("pct" %in% colnames(.base))) {
@@ -89,19 +90,71 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
     warning("The percentage represented is less than 100%. This may indicate missing data or rounding errors.")
   }
 
-  # Define default palette if not provided based on unique categories
-  unique_cats <- unique(.base[[var_label]])
-  num_unique <- length(unique_cats)
+  # -- Define palette and category_colors with fallback
+  levels_vec <- unique(.base[[var_label]])
+  n_lvls <- length(levels_vec)
+
+  # Case 1: .palette is a single color → expand
+  if (!is.null(.palette) && length(.palette) == 1) {
+    .palette <- rep(.palette, n_lvls)
+  }
+
+  # Case 2: If still NULL → assign fallback
   if (is.null(.palette)) {
-    if (num_unique == 2) {
-      .palette <- c("#AC0000", "#08305B")
+    .palette <- if (n_lvls == 2) {
+      c("#AC0000", "#08305B")
     } else {
-      .palette <- RColorBrewer::brewer.pal(n = min(num_unique, 11), name = "RdBu")
+      RColorBrewer::brewer.pal(min(n_lvls, 11), "RdBu")
     }
   }
 
-  # Create initial color mapping for all categories
-  category_colors <- setNames(.palette, unique_cats)
+  # Case 3: Handle .category_colors if provided
+  if (!is.null(.category_colors)) {
+    if (is.list(.category_colors)) {
+      flat <- unlist(
+        lapply(names(.category_colors), function(col) {
+          lvls_in <- .category_colors[[col]]
+          setNames(rep(col, length(lvls_in)), lvls_in)
+        })
+      )
+      bad <- setdiff(names(flat), levels_vec)
+      if (length(bad))
+        warning("These levels in .category_colors not in data: ",
+                paste(bad, collapse = ", "))
+      category_colors <- setNames(rep(NA_character_, n_lvls), levels_vec)
+      overlap <- intersect(names(flat), levels_vec)
+      category_colors[overlap] <- flat[overlap]
+      unmapped <- levels_vec[is.na(category_colors)]
+      if (length(unmapped))
+        warning("Unmapped levels, using fallback: ",
+                paste(unmapped, collapse = ", "))
+      fb <- setNames(.palette, levels_vec)
+      category_colors[is.na(category_colors)] <- fb[is.na(category_colors)]
+    } else {
+      assertthat::assert_that(
+        is.character(.category_colors) && !is.null(names(.category_colors)),
+        msg = ".category_colors must be a named character vector or list."
+      )
+      bad <- setdiff(names(.category_colors), levels_vec)
+      if (length(bad))
+        warning("These levels in .category_colors not in data: ",
+                paste(bad, collapse = ", "))
+      category_colors <- setNames(rep(NA_character_, n_lvls), levels_vec)
+      overlap <- intersect(names(.category_colors), levels_vec)
+      category_colors[overlap] <- .category_colors[overlap]
+      unmapped <- levels_vec[is.na(category_colors)]
+      if (length(unmapped))
+        warning("Unmapped levels, using fallback: ",
+                paste(unmapped, collapse = ", "))
+      fb <- setNames(.palette, levels_vec)
+      category_colors[is.na(category_colors)] <- fb[is.na(category_colors)]
+    }
+  } else {
+    category_colors <- setNames(.palette, levels_vec)
+  }
+
+  # # Create initial color mapping for all categories
+  # category_colors <- setNames(.palette, unique_cats)
 
   # Modify colors if gray categories are specified
   if (!is.null(.gray_category)) {
@@ -152,10 +205,10 @@ plot_donut_univariadas_test2 <- function(.base, .var = NULL, .palette = NULL,
       axis.ticks = element_blank(),
       axis.text = element_blank(),
       panel.grid = element_blank(),
-      legend.background = element_rect(fill = "transparent"),
-      legend.box.background = element_rect(fill = "transparent"),
-      panel.background = element_rect(fill = "transparent"),
-      plot.background = element_rect(fill = "transparent", color = NA),
+      legend.background = element_rect(fill = "transparent", colour = "transparent"),
+      #legend.box.background = element_rect(fill = "transparent"),
+      panel.background = element_blank(),
+      plot.background = element_rect(fill = "transparent", color = NA)
     ) +
     geom_text(
       data = filtered_data,
