@@ -9,11 +9,11 @@ tabulados_banner(.base, .var, .banner = NULL, .wt = NULL, .cases = FALSE)
 \arguments{
 \item{.base}{A dataframe to be used for the tabulations.}
 
-\item{.var}{A selection of variables to tabulate.}
+\item{.var}{A selection of variables to tabulate (can be one or more).}
 
-\item{.banner}{Optional variable to use as column banner in the tabulation.}
+\item{.banner}{Optional variable(s) to use as column banner in the tabulation.}
 
-\item{.wt}{Optional variable name to be used for weights.}
+\item{.wt}{Optional variable to be used for weights.}
 
 \item{.cases}{Logical. If \code{TRUE}, includes case counts in the tabulation.}
 }
