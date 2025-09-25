@@ -131,6 +131,11 @@ plot_bar_univariadas <- function(
                             !(.data[[var_label]] %in% omit_vec),
                             pct >= .text_threshold)
 
+  # -- Rev categories to get to 1st category on top in .horizontal TRUE
+  if (.horizontal) {
+    .base[[var_label]] <- forcats::fct_rev(.base[[var_label]])
+  }
+
   # -- Build plot
   p <- ggplot2::ggplot(.base,
                        ggplot2::aes(x=.data[[var_label]], y=pct, fill=.data[[var_label]])) +
