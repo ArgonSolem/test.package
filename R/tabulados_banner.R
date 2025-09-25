@@ -89,7 +89,7 @@ tabulados_banner <- function(.base, .var, .banner = NULL, .wt = NULL, .cases = F
     # Always include column percentages
     tab %>%
       tab_stat_cpct(
-        total_statistic = if (!is.null(wt_name)) c("w_cpct", "u_cpct") else "u_cpct",
+        total_statistic = if (!is.null(wt_name)) c("w_cases", "u_cases") else "u_cases",
         total_label = if (!is.null(wt_name))
           c("Casos válidos ponderados", "Casos válidos no ponderados")
         else
